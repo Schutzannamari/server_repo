@@ -98,6 +98,51 @@ public class UserControllerTest {
         .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
   }
 
+  @Test
+  public void createUser_usernameAlreadyExists_errorReturned() throws Exception {
+    // given
+    given(userService.createUser(Mockito.any())).willThrow(new IllegalArgumentException("Username is already taken"));
+
+    UserPostDTO userPostDTO = new UserPostDTO();
+    userPostDTO.setName("Test User");
+    userPostDTO.setUsername("existingUsername");
+
+    // when/then -> do the request + validate the result
+    MockHttpServletRequestBuilder postRequest = post("/users")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(asJsonString(userPostDTO));
+
+    // then
+    mockMvc.perform(postRequest)
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.message", is("Username is already taken")));
+  }
+
+  @Test
+  public void getUserProfile_validUserId_userProfileReturned() throws Exception {
+    // given
+    User user = new User();
+    user.setId(1L);
+    user.setName("Test User");
+    user.setUsername("testUser");
+    user.setStatus(UserStatus.ONLINE);
+
+    given(userService.getUserById(1L)).willReturn(user);
+
+    // when
+    MockHttpServletRequestBuilder getRequest = get("/users/1")
+            .contentType(MediaType.APPLICATION_JSON);
+
+    // then
+    mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(user.getId().intValue())))
+            .andExpect(jsonPath("$.name", is(user.getName())))
+            .andExpect(jsonPath("$.username", is(user.getUsername())))
+            .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
+  }
+
+
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
    * can be processed

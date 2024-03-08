@@ -17,6 +17,7 @@ import org.mapstruct.factory.Mappers;
  * Always created one mapper for getting information (GET) and one mapper for
  * creating information (POST).
  */
+
 @Mapper
 public interface DTOMapper {
 
@@ -30,5 +31,8 @@ public interface DTOMapper {
   @Mapping(source = "name", target = "name")
   @Mapping(source = "username", target = "username")
   @Mapping(source = "status", target = "status")
+  @Mapping(source = "creationDate", target = "creationDate")
+  @Mapping(source = "birthDate", target = "birthDate")
   UserGetDTO convertEntityToUserGetDTO(User user);
 }
+
